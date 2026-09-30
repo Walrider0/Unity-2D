@@ -13,10 +13,31 @@ public class Player : MonoBehaviour
 
     private float jumpVelocity = 12f;
 
+
+
+    private int cherrycounter = 0;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>(); //Ami obejctre rá van húzva a script arra rá húz mindent, független ha prívált
         spriter = GetComponent<SpriteRenderer>();
+
+        if (rb != null)
+        {
+            rb.gravityScale = 0;
+            rb.freezeRotation = true;
+        }
+
+
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.GetComponent<Rigidbody2D>() != null)
+        {
+            cherrycounter++;
+            Destroy(collision.gameObject);
+        }
     }
 
     void Update()
@@ -24,7 +45,7 @@ public class Player : MonoBehaviour
         PlayerMovement();
         if (rb != null)
         {
-            rb.linearVelocity = new Vector2(direction.x, rb.linearVelocity.y);
+            rb.linearVelocity = direction * speed;
         }
         else
         {
@@ -32,11 +53,16 @@ public class Player : MonoBehaviour
         }
         //isGrounded = Physics2D.Raycast(transform.position, Vector2.down, 0.12f);
 
-        GroundedCheck();
+        //GroundedCheck();
+
+
     }
 
     public void PlayerMovement()
     {
+        float v = 0f;
+
+
         float h = 0f;
         if (Keyboard.current.dKey.isPressed) //input.GetKeyDown(KeyCode.D) - A régi megolás
         {
@@ -48,10 +74,20 @@ public class Player : MonoBehaviour
             h = -1f;
             spriter.flipX = true;
         }
-        if (h != 0)
+
+        if (Keyboard.current.wKey.isPressed)
+        {
+            v = -1f;
+        }
+        else if (Keyboard.current.sKey.isPressed)
+        {
+            v = -1f;
+        }
+
+        if (h != 0f || v != 0f)
         {
             speed = 2f;
-            direction = new Vector2(h, 0f);
+            direction = new Vector2(h,v).normalized;
         }
         else
         {
@@ -59,18 +95,18 @@ public class Player : MonoBehaviour
             direction = Vector2.zero;
         }
 
-        if (Keyboard.current.wKey.wasPressedThisFrame && isGrounded == true)
-        {
-            if (rb != null)
-            {
-                rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpVelocity);
-            }
-            else
-            {
-                transform.position += Vector3.up * (jumpVelocity * 0.1f);
-            }
-            isGrounded = false;
-        }
+        //if (Keyboard.current.wKey.wasPressedThisFrame && isGrounded == true)
+        //{
+        //    if (rb != null)
+        //    {
+        //        rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpVelocity);
+        //    }
+        //    else
+        //    {
+        //        transform.position += Vector3.up * (jumpVelocity * 0.1f);
+        //    }
+        //    isGrounded = false;
+        //}
     }
 
     private void GroundedCheck()
