@@ -11,9 +11,11 @@ public class Player : MonoBehaviour
 
     private SpriteRenderer spriter; // 2D-nél a kép merre néz 
 
-    private float jumpVelocity = 12f;
+    //private float jumpVelocity = 12f;
 
+    public Enemy enemy;
 
+    private Vector2 distanceToEnemy;
 
     private int cherrycounter = 0;
 
@@ -33,7 +35,8 @@ public class Player : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.GetComponent<Rigidbody2D>() != null)
+        if (collision.gameObject.GetComponent<Rigidbody2D>() != null
+            && collision.gameObject.CompareTag("Cherry"))
         {
             cherrycounter++;
             Destroy(collision.gameObject);
@@ -77,7 +80,7 @@ public class Player : MonoBehaviour
 
         if (Keyboard.current.wKey.isPressed)
         {
-            v = -1f;
+            v = 1f;
         }
         else if (Keyboard.current.sKey.isPressed)
         {
@@ -87,7 +90,7 @@ public class Player : MonoBehaviour
         if (h != 0f || v != 0f)
         {
             speed = 2f;
-            direction = new Vector2(h,v).normalized;
+            direction = new Vector2(h, v).normalized;
         }
         else
         {
@@ -109,6 +112,10 @@ public class Player : MonoBehaviour
         //}
     }
 
+    private void Attack()
+    {
+        enemy.TakeDamage(5);
+    }
     private void GroundedCheck()
     {
         if (rb.linearVelocityY == 0)
