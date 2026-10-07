@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour
 {
@@ -7,17 +8,21 @@ public class Player : MonoBehaviour
     public float speed = 0f;
     public Vector2 direction;
     private Rigidbody2D rb;
-    private bool isGrounded = true;
+    //private bool isGrounded = true;
 
     private SpriteRenderer spriter; // 2D-nél a kép merre néz 
 
+    private bool hasSnowball;
     //private float jumpVelocity = 12f;
+
+    public GameObject snowball;
 
     public Enemy enemy;
 
-    private Vector2 distanceToEnemy;
+    public int hp = 10;
+    //private Vector2 distanceToEnemy;
 
-    private int cherrycounter = 0;
+    //private int cherrycounter = 0;
 
     void Start()
     {
@@ -35,14 +40,31 @@ public class Player : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.GetComponent<Rigidbody2D>() != null
-            && collision.gameObject.CompareTag("Cherry"))
-        {
-            cherrycounter++;
-            Destroy(collision.gameObject);
-        }
+        if (hasSnowball || !collision.gameObject.CompareTag("SnowPile")) return;
+
+        hasSnowball = true;
+        Destroy(collision.gameObject);
+
+        //if (collision.gameObject.GetComponent<Rigidbody2D>() != null
+        //    && collision.gameObject.CompareTag("Cherry"))
+        //{
+        //    cherrycounter++;
+        //    Destroy(collision.gameObject);
+        //}
+
+
+
     }
 
+    public void TakeDamage(int damage)
+    {
+        hp -= damage;
+        Debug.Log($"Taken {damage} amount of damage");
+        if (hp <= 0)
+        {
+            SceneManager.LoadScene("SampleScene");
+        }
+    }
     void Update()
     {
         PlayerMovement();
@@ -98,6 +120,17 @@ public class Player : MonoBehaviour
             direction = Vector2.zero;
         }
 
+        if ((Keyboard.current.eKey.wasPressedThisFrame || Mouse.current.leftButton.wasPressedThisFrame) && hasSnowball)
+        {
+            Vector2 mouse = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+
+            Vector2 aimDirection = mouse - (Vector2)transform.position;
+
+            GameObject ball = Instantiate(snowball, transform.position, Quaternion.identity); //Prefebet létrehoz a hiearhiában !
+            ball.GetComponent<SnowBall>().Launch(aimDirection, true);
+            hasSnowball = false;
+        }
+
         //if (Keyboard.current.wKey.wasPressedThisFrame && isGrounded == true)
         //{
         //    if (rb != null)
@@ -112,17 +145,18 @@ public class Player : MonoBehaviour
         //}
     }
 
-    private void Attack()
-    {
-        enemy.TakeDamage(5);
-    }
-    private void GroundedCheck()
-    {
-        if (rb.linearVelocityY == 0)
-        {
-            isGrounded = true;
-            Debug.Log("A földön vagy !");
-        }
+    //private void Attack()
+    //{
+    //    enemy.TakeDamage(5);
+    //}
 
-    }
+    //private void GroundedCheck()
+    //{
+    //    if (rb.linearVelocityY == 0)
+    //    {
+    //        isGrounded = true;
+    //        Debug.Log("A földön vagy !");
+    //    }
+
+    //}
 }
